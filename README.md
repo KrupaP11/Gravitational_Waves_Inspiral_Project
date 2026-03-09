@@ -6,7 +6,7 @@ A machine learning surrogate model for gravitational-wave binary inspirals, buil
 
 ## Overview
 
-When two massive objects (such as black holes or neutron stars) orbit each other, they emit gravitational waves and slowly spiral inward — a process called an **inspiral**. The key parameters describing this system are the **chirp mass** (which controls how fast the binary spirals inward) and the **merger time** (how long until the two objects collide).
+When two massive objects (such as black holes or neutron stars) orbit each other, they emit gravitational waves and slowly spiral inward, a process called an **inspiral**. The key parameters describing this system are the **chirp mass** (which controls how fast the binary spirals inward) and the **merger time** (how long until the two objects collide).
 
 This project investigates whether a Random Forest can recover these parameters from simulated gravitational-wave strain data. The short answer: it can, but not for the right reasons.
 
@@ -16,7 +16,7 @@ This project investigates whether a Random Forest can recover these parameters f
 
 The dataset is generated using:
 
-- **Peters (1964) orbital decay formula** — describes how the orbital separation shrinks over time due to gravitational-wave emission
+- **Peters (1964) orbital decay formula** - describes how the orbital separation shrinks over time due to gravitational-wave emission
 - **Quadrupole strain approximation** — gives the gravitational-wave strain amplitude $h(t)$ as a function of chirp mass, orbital frequency, and observer distance
 - **Kepler's law** — used to derive the orbital frequency from the separation
 
@@ -65,7 +65,7 @@ A **Random Forest** regressor (`scikit-learn`) was chosen for its ability to han
 
 ## Key Finding
 
-Feature importance analysis revealed that the model was **not** learning from the strain signal. Instead, it exploited the fact that $r_0$ and $\mu$ appear directly in the analytical formulas for merger time and chirp mass — effectively reconstructing an algebraic shortcut rather than learning any physics.
+Feature importance analysis revealed that the model was **not** learning from the strain signal. Instead, it exploited the fact that $r_0$ and $\mu$ appear directly in the analytical formulas for merger time and chirp mass, effectively reconstructing an algebraic shortcut rather than learning any physics.
 
 When restricted to strain-only features, the model failed entirely, defaulting to predicting the mean value. This highlights why real gravitational-wave parameter estimation (as done at LIGO) relies on matched filtering and Bayesian inference rather than simple regression on raw strain.
 
