@@ -32,6 +32,14 @@ Numerical integration of the orbital decay ODE is performed with `scipy.integrat
 | Features | 20 |
 | Targets | 2 |
 
+**Parameter ranges:**
+
+| Parameter | Range |
+|---|---|
+| $m_1, m_2$ | $1.2 - 50\ M_\odot$ (neutron stars to stellar-mass black holes) |
+| $r_0$ | $5 \times 10^6$ km to $1 \times 10^8$ km |
+| $d$ | $10$ kpc to $10^5$ kpc |
+
 **Features:**
 - Noisy strain values at 17 time stamps $h_\text{noisy}(t=1,\dots,17)$
 - Distance to observer $d$
@@ -41,14 +49,6 @@ Numerical integration of the orbital decay ODE is performed with `scipy.integrat
 **Targets:**
 - Chirp mass $\mathcal{M}$
 - Time to merger $t_m$
-
-**Parameter ranges:**
-
-| Parameter | Range |
-|---|---|
-| $m_1, m_2$ | $1.2 - 50\ M_\odot$ (neutron stars to stellar-mass black holes) |
-| $r_0$ | $5 \times 10^6$ km to $1 \times 10^8$ km |
-| $d$ | $10$ kpc to $10^5$ kpc |
 
 ---
 
