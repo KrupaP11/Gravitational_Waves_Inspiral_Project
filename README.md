@@ -1,6 +1,6 @@
 # ML Regression on Synthetic Gravitational-Wave Inspirals
 
-A machine learning surrogate model for gravitational-wave binary inspirals, built as part of a course project. A synthetic dataset of 1,000 samples is generated from first-principles physics, and a Random Forest regression model is trained to recover binary parameters from strain time-series features. For full derivations and methodology, see the [project report](report/ML_Regression_Inspiral_Report.pdf).
+A machine learning surrogate model for gravitational-wave binary inspirals, built as part of a Machine Learning course project. A synthetic dataset of 1,000 samples is generated from first-principles physics, and a Random Forest regression model is trained to recover binary parameters from strain time-series features. For full derivations and methodology, see the [project report](report/ML_Regression_Inspiral_Report.pdf).
 
 ---
 
