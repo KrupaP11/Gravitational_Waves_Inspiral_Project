@@ -100,5 +100,6 @@ python plot_results.py       # Generate predicted vs. actual and feature importa
 ## References
 
 - Peters, P. C. (1964). *Gravitational radiation and the motion of two point masses.* Physical Review, 136(4B).
+- Creighton, T. Formulae and details: Gravitational wave details. Caltech TAPIR. https://www.tapir.caltech.edu/~teviet/Waves/gwave_details.html#inspiral
 - Veitch, J. et al. (2015). *Parameter estimation for compact binaries with LALInference.* Physical Review D, 91.
 - Ashton, G. et al. (2019). *Bilby: A user-friendly Bayesian inference library for gravitational-wave astronomy.* ApJS, 241.
