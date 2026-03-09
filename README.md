@@ -90,9 +90,8 @@ pip install numpy scipy scikit-learn matplotlib
 ## Usage
 
 ```bash
-python generate_data.py      # Generate synthetic inspiral dataset
-python train_model.py        # Train Random Forest and evaluate
-python plot_results.py       # Generate predicted vs. actual and feature importance plots
+python GW_Inspiral_Data.py              # Generate synthetic inspiral dataset
+python ML_Regression_Inspiral.py        # Train Random Forest and evaluate
 ```
 
 ---
