@@ -46,7 +46,7 @@ Numerical integration of the orbital decay ODE is performed with `scipy.integrat
 
 | Parameter | Range |
 |---|---|
-| $m_1, m_2$ | $1.4 - 50\ M_\odot$ (neutron stars to stellar-mass black holes) |
+| $m_1, m_2$ | $1.2 - 50\ M_\odot$ (neutron stars to stellar-mass black holes) |
 | $r_0$ | $5 \times 10^6$ km to $1 \times 10^8$ km |
 | $d$ | $10$ kpc to $10^5$ kpc |
 
