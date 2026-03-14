@@ -1,0 +1,388 @@
+\documentclass[aspectratio=169]{beamer}
+
+% ── Theme & Colours ──────────────────────────────────────────────────────────
+\usetheme{Boadilla}
+\usecolortheme{default}
+\definecolor{darkpurple}{RGB}{75,0,130}
+\setbeamercolor{title}{fg=darkpurple}
+\setbeamercolor{structure}{fg=darkpurple}
+\setbeamercolor{block title}{bg=darkpurple, fg=white}
+\setbeamercolor{block body}{bg=darkpurple!8}
+\setbeamertemplate{navigation symbols}{}
+
+% ── Packages ─────────────────────────────────────────────────────────────────
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage[style=authoryear, backend=bibtex, maxnames=2]{biblatex}
+
+% ── Bibliography ─────────────────────────────────────────────────────────────
+\addbibresource{references.bib}
+
+% ── Title Info ────────────────────────────────────────────────────────────────
+\title[ML on GW Inspirals]{Machine Learning Regression on Synthetic Gravitational-Wave Inspirals}
+\author{Krupa Pothiwala}
+\institute{Florida Institute of Technology}
+\date{February 2026}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{document}
+\maketitle
+\section{Background Information}
+\begin{frame}{Motivation}
+  \begin{itemize}
+    \item Gravitational-wave (GW) astronomy relies on recovering source parameters from noisy detector data
+    \vspace{0.2cm}
+    \item Classical parameter estimation (e.g.\ LIGO's matched filtering + Bayesian inference) is \textbf{computationally expensive}
+    \vspace{0.2cm}
+    \item \textbf{Goal:} Build an ML surrogate model that maps GW inspiral features to source parameters
+    \vspace{0.2cm}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Quadrupole Approximation}
+  \begin{columns}
+    \begin{column}{0.58\textwidth}
+      \begin{itemize}
+        \item A \textbf{quadrupole moment} describes the asymmetric shape of a mass distribution
+        \vspace{0.2cm}
+        \item This changing configuration \textbf{radiates gravitational waves} \parencite{Creighton2026}
+      \end{itemize}
+      \vspace{0.4cm}
+      \begin{block}{Key Assumptions}
+        \begin{itemize}
+          \item Weak-field regime
+          \item Non-relativistic velocities ($v \ll c$)
+          \item System size $\ll$ gravitational wavelength
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.28\textwidth}
+      \hfill
+      \begin{tikzpicture}[scale=0.85]
+        % Simple dumbbell cartoon
+        \draw[darkblue, very thick] (-1.2,0) -- (1.2,0);
+        \fill[darkblue] (-1.2,0) circle (0.25);
+        \fill[darkblue] (1.2,0) circle (0.25);
+        \node[below, darkblue] at (0,-0.4) {\small Rotating dumbbell};
+        \draw[->, darkblue!60, thick] (0.5,0.6) arc(30:150:0.6);
+        \node[above, darkblue!70] at (0,0.9) {\small $\omega$};
+      \end{tikzpicture}
+      \vspace{0.3cm}
+      \begin{flushright}
+        {\small Analogy: the shape of a dumbbell changes as it rotates or evolves}
+      \end{flushright}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================================
+\section{Data Generation}
+% =============================================================================
+
+\begin{frame}{Physical Parameters}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \textbf{System Parameters}
+      \begin{itemize}
+        \item Masses: $m_1, m_2 \in [1.2,\,50]\,M_\odot$ 
+        \vspace{0.2cm}
+        \item Initial Separation: $r_0 \in [5\times10^6,\,10^8]$ km
+        \vspace{0.2cm}
+        \item Distance to observer: $d \in [10,\,10^5]$ kpc
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.45\textwidth}
+      \textbf{Physical Constants}
+      \begin{itemize}
+        \item $G = 6.674\times10^{-11}$ m$^3$ kg$^{-1}$ s$^{-2}$
+        \item $c = 3\times10^8$ m/s
+        \item $M_\odot = 1.989\times10^{30}$ kg
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \vspace{0.8cm}
+  \begin{itemize}
+    \item Circular orbits assumed ($e \approx 0$), consistent with compact binaries \parencite{Peters1964}
+    \vspace{0.2cm}
+    \item \textbf{1,000 synthetic samples} generated in total
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Orbital Decay \& Frequency}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+    \vspace{0.2cm}
+      \textbf{Orbital Decay} \parencite{Peters1964}
+      \[
+        \frac{dr}{dt} = -\frac{64}{5}\frac{G^3 m_1 m_2 (m_1+m_2)}{c^5 r^3}
+      \]
+      \begin{itemize}
+        \item Solved numerically via \texttt{scipy} RK45
+        \vspace{0.2cm}
+        \item Tracks how separation shrinks with time
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \textbf{Orbital Frequency} (derived in the report)
+        \vspace{0.2cm}
+      \[
+        f_\text{orb} = \frac{1}{2\pi}\sqrt{\frac{G(m_1+m_2)}{r^3}}
+      \]
+      \begin{itemize}
+        \item Derived from $F_g = F_\text{cen}$
+        \vspace{0.2cm}
+        \item Increases as separation decreases (``chirp'')
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Strain Amplitude \& Target Labels}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \textbf{GW Strain} \parencite{Creighton2026}
+      \vspace{0.2cm}
+      \[
+        h(t) = \frac{4(G\mathcal{M})^{5/3}\,\omega_r^{2/3}}{c^4\,d}
+      \]
+      \begin{itemize}
+        \item $\mathcal{M}$: chirp mass
+        \item $\omega_r = 2\pi f_\text{orb}$: orbital angular frequency
+        \item $d$: distance to observer
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \textbf{Target Labels}\\[0.5em]
+      \vspace{0.2cm}
+      Chirp mass:
+      \[
+        \mathcal{M} = \frac{(m_1 m_2)^{3/5}}{(m_1+m_2)^{1/5}}
+      \]
+      \vspace{0.2cm}
+      Merger time:
+      \[
+        t_m = \frac{5}{256}\frac{c^5 r_0^4}{G^3 m_1 m_2(m_1+m_2)}
+      \]
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================================
+\section{Data Preparation}
+% =============================================================================
+
+% =============================================================================
+\section{Data Preparation}
+% =============================================================================
+
+\begin{frame}{Dataset \& Feature Engineering}
+  \textbf{20 Input Features}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      \begin{itemize}
+        \item $h_\text{noisy}(t_1), \ldots, h_\text{noisy}(t_{17})$ \\ (noisy strain time-series)
+        \vspace{0.2cm}
+        \item $d$: observer distance
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{itemize}
+        \item $r_0$: initial separation
+        \vspace{0.2cm}
+        \item $\mu = \frac{m_1 m_2}{m_1+m_2}$: reduced mass
+      \end{itemize}
+    \end{column}
+  \end{columns}
+ 
+  \vspace{0.8cm}
+  \textbf{Preprocessing}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      \begin{itemize}
+        \item No missing values (synthetic data)
+        \vspace{0.2cm}
+        \item \textbf{Log-transform} applied — large SI-unit magnitudes
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{itemize}
+        \item Values converted back to linear space for MAE
+        \vspace{0.2cm}
+        \item \textbf{75/25 train-test split} with fixed random seed
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================================
+\section{Random Forest Model}
+% =============================================================================
+
+\begin{frame}{Why Random Forest?}
+  \begin{itemize}
+    \item \textbf{Ensemble method:} combines many decision trees for better generalization \parencite{Kavlakoglu2025}
+    \vspace{0.3cm}
+    \item \textbf{Non-linearity:} strain $\to$ chirp mass / merger time mapping is highly non-linear
+    \vspace{0.3cm}
+    \item \textbf{Scale-invariance:} features span vastly different physical scales and RF handles this naturally
+    \vspace{0.3cm}
+    \item \textbf{Overfitting mitigation:} ensemble averaging reduces variance with only 1,000 samples
+    \vspace{0.3cm}
+    \item Implementation: \texttt{scikit-learn} \texttt{RandomForestRegressor}
+  \end{itemize}
+\end{frame}
+
+% =============================================================================
+\section{Results}
+% =============================================================================
+
+\begin{frame}{Experiment 1 — Full Feature Set}
+  \centering
+  \includegraphics[width=0.70\linewidth]{Output/predicted_vs_actual.png}\\
+  {\scriptsize Figure 1: Predicted vs.\ Actual — full feature set}
+ 
+  \vspace{1.0em}
+  \begin{columns}[c]
+    \begin{column}{0.52\textwidth}
+      \begin{itemize}
+        \item Decent training fit but poor generalization
+        \item Model \textbf{memories $r_0$ values}; struggles at extremes
+        \item Large MAE reflects SI-unit scale
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \centering
+      \begin{tabular}{lcc}
+        & \textbf{Train} & \textbf{Test} \\
+        \midrule
+        MAE   & $4.1\times10^{29}$ & $1.1\times10^{30}$ \\
+        \midrule
+        $R^2$ & $0.87$ & $0.59$ \\
+        \bottomrule
+      \end{tabular}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Feature Importance — Full Feature Set}
+  \begin{columns}
+    \begin{column}{0.45\textwidth}
+      \begin{itemize}
+        \item \textbf{$r_0$ dominates} ($\sim$75\%) for merger time prediction and \textbf{$\mu$ is second} ($\sim$25\%) for chirp mass prediction
+        \vspace{0.2cm}
+        \item Both appear directly in the \emph{analytical formulae}:
+          \begin{itemize}
+            \item $t_m \propto r_0^4$
+            \item $\mathcal{M}$ depends on $\mu$
+          \end{itemize}
+        \vspace{0.2cm}
+        \item Strain features contribute 
+        \textbf{effectively nothing}
+        \vspace{0.2cm}
+        \item Model learned \textbf{algebra, not physics}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.52\textwidth}
+      \centering
+      % Place fig3b_importance_full.png in the same folder as this .tex file
+      \includegraphics[width=0.85\linewidth]{Output/feature_importance.png}\\
+      \vspace{0.1em}
+      {\scriptsize Figure 3b: Feature importances — full feature set}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Experiment 2 — Strain-Only Features}
+    \centering
+      \includegraphics[width=0.70\linewidth]{Output/h_20_predicted_vs_actual.png}\\
+      {\scriptsize Figure 2: Predicted vs.\ Actual — strain-only features}
+    \vspace{0.3cm}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+        \item Removed $r_0$, $d$, $\mu$ to test whether strain alone contains learnable signal
+        \vspace{0.2em}
+        \item Increased strain samples from 17 to \textbf{20 time-stamps}
+    \end{itemize}
+    \end{column}
+        \begin{column}{0.5\textwidth}
+        \begin{itemize}
+            \item Predictions collapse to a \emph{flat horizontal line} indicating the dataset mean
+            \vspace{0.2cm}
+            \item Classic signature of a model that \textbf{found no learnable signal}
+        \end{itemize}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Feature Importance — Strain-Only}
+  \begin{columns}
+    \begin{column}{0.45\textwidth}
+      \begin{itemize}
+        \item All feature importances are effectively \textbf{zero}
+        \vspace{0.2cm}
+        \item Apparent negative values are a \emph{plotting artifact} of axis scaling
+        \vspace{0.2cm}
+        \item Model cannot extract any meaningful signal from 20 noisy strain snapshots
+        \vspace{0.2cm}
+        \item Confirms: raw strain time-series is \textbf{insufficient} for this regressor
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.52\textwidth}
+      \centering
+      % Place fig3a_importance_strain.png in the same folder as this .tex file
+      \includegraphics[width=0.85\linewidth]{Output/h_20_feature_importance.png}\\
+      \vspace{0.1em}
+      {\scriptsize Figure 3a: Feature importances — strain-only}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================================
+\section{Conclusion \& Different Approach}
+% =============================================================================
+
+\begin{frame}{Conclusion}
+  \begin{block}{Key Findings}
+    \begin{itemize}
+      \item A Random Forest with \textbf{full features} ($R^2 = 0.87$ train) was exploiting algebraic shortcuts, not learning from strain
+      \item Restricting to \textbf{strain only} caused complete model failure ($R^2 \approx 0$)
+      \item Real GW parameter estimation uses \textbf{matched filtering} + Bayesian inference (LALInference \parencite{Veitch2015}, Bilby \parencite{Ashton2019}) — far beyond a simple regressor
+    \end{itemize}
+  \end{block}
+  \vspace{0.4em}
+  \begin{block}{Lessons Learned}
+    \begin{itemize}
+      \item Including analytically-derived features \emph{leaks} the answer to the model
+      \item 17–20 noisy time samples are \textbf{too sparse} to capture waveform morphology
+      \item Feature importance is a vital diagnostic tool
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Different Approach}
+  \begin{itemize}
+    \item Generate a \textbf{denser strain time-series} (hundreds of time steps spanning the full inspiral)
+    \vspace{0.4em}
+    \item \textbf{Normalise strain by distance} to remove $d$ as an implicit shortcut
+    \vspace{0.4em}
+    \item Explore \textbf{other model architectures} that can extract waveform morphology
+    \vspace{0.4em}
+    \item Compare against LIGO's \textbf{matched filtering} pipeline as a baseline
+    \vspace{0.4em}
+    \item Use \textbf{Bayesian inference} frameworks (Bilby) to produce posterior distributions over parameters
+  \end{itemize}
+\end{frame}
+
+% =============================================================================
+\section*{References}
+% =============================================================================
+
+\begin{frame}[allowframebreaks]{References}
+  \printbibliography
+\end{frame}
+
+\end{document}
