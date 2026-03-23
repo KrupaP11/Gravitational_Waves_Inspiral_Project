@@ -1,0 +1,38 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage[top=0.5in, bottom=0.5in]{geometry}
+
+\begin{document}
+\begin{center}
+    \LARGE{Machine Learning Project Proposal - 1}\\
+    \large{Krupa Pothiwala}
+\end{center}
+
+
+\section{Goals of the Study}
+Build a classical machine learning surrogate that maps a gravitational-wave signal or a reduced representation of that signal to the small set of binary parameters (masses, initial separation,…), using only physics-based synthetic data (quadrupole/inspiral approximations) and non-neural classical regression methods.
+\\
+\\
+Inspiral is the phase of a compact-binary (two black holes / neutron stars) coalescence where the two objects orbit each other and slowly spiral together because they lose orbital energy by emitting gravitational waves (GWs).
+\\
+\\
+Quadrupole Approximation - In weak-field, slow-motion systems the leading contribution to radiation comes from the mass quadrupole moment of the source. Gravitational waves are proportional to the second time derivative of that quadrupole moment divided by the distance to the observer.
+
+\section{Intended data sources}
+Creating synthetic data. 
+1. Deciding input parameter: $M_1$ and $M_2$ masses of objects in solar mass units, $f_0$ initial orbital frequency, $r_0$ initial separation or initial GW frequency. Might do eccentricity $\epsilon$, distance $D$, and orientation/phase.
+\\
+\\Will evolve the orbital frequency 
+$f(t)$ and phase $\phi(t)$ forward until some stopping condition using leading-order energy loss formula.
+\\
+\\Compute the waveform polarizations $h_+(t)$ and $h_\times(t)$ from the second time derivative of the quadrupole moment and projected to the observer.
+\\
+\\Choose a common time grid for all waveforms (same duration \& sampling rate) so waveforms are directly comparable. Might add some noise to mimic actual data.
+
+\section{Plans for cleaning/pre-processing}
+Data will be normalized and standardized. PCA may be applied to reduce dimensionality. Train/test split will be implemented.
+
+\section{Models to use}
+Currently thinking about Gaussian Regression method. Again depends on the data set however, I think Gaussian would fit very well because it can fit complex smooth functions without fixing a parametric form. 
+I will basically be giving the model the waveform at 20 different timestamps and asking the model to predict the features such as Chirp mass, time to merger, or initial separation.
+\end{document}
