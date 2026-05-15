@@ -25,11 +25,12 @@
 \title[ML on GW Inspirals]{Machine Learning Regression on Synthetic Gravitational-Wave Inspirals}
 \author{Krupa Pothiwala}
 \institute{Florida Institute of Technology}
-\date{March 2026}
+\date{May 2026}
 
 % ─────────────────────────────────────────────────────────────────────────────
 \begin{document}
 \maketitle
+
 \section{Background Information}
 \begin{frame}{Motivation}
   \begin{itemize}
@@ -41,6 +42,43 @@
     \vspace{0.2cm}
   \end{itemize}
 \end{frame}
+
+\begin{frame}{What are Gravitational Waves?}
+\begin{columns}[c]
+
+  \column{0.52\textwidth}
+  \textbf{Ripples in spacetime} produced by accelerating masses. First predicted by Einstein's General Relativity (1916), first directly detected by LIGO (2015).\\[8pt]
+  Key properties:
+  \begin{itemize}
+    \item Travel at the speed of light
+    \item Stretch and squeeze space transversely
+    \item Carry energy away from the source
+    \item Strongest from compact, violent events: \\ binary black holes, neutron star mergers
+  \end{itemize}
+  \column{0.44\textwidth}
+  \begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{Output/GW_Image.jpg}
+    \caption{\footnotesize \textit{[Binary Black Hole merger Simulation]}}
+  \end{figure}
+\end{columns}
+\end{frame}
+
+\section{Paper}
+\begin{frame}{Radiation and the Motion of Two Point Masses by \cite{Peters1964}}
+    \begin{itemize}
+        \item Question: When two massive objects (like stars) orbit each other, does general relativity predict they will slowly spiral together? And if so, how fast?
+        \vspace{0.2cm}
+        \item Peters calculated exactly how much energy and angular momentum are radiated per orbit.
+        \item Using those energy-loss calculations, he derived equations describing how the orbit changes over time.
+        \vspace{0.2cm}
+        \item In this section of the paper Peters treats the system of two point masses moving in elliptical orbits under their mutual gravitational attraction.
+        \vspace{0.2cm}
+        \item Hulse and Taylor won the Nobel Prize in 1993 for this. %This paper was essentially vindicated in 1974 when Hulse and Taylor discovered the binary pulsar PSR 1913+16.
+        %\vspace{0.2cm}
+        %\item This paper also laid the theoretical groundwork for LIGO, which directly detected gravitational waves in 2015.
+    \end{itemize}
+\end{frame} 
 
 \begin{frame}{Quadrupole Approximation}
   \begin{columns}
@@ -120,9 +158,9 @@
         \frac{dr}{dt} = -\frac{64}{5}\frac{G^3 m_1 m_2 (m_1+m_2)}{c^5 r^3}
       \]
       \begin{itemize}
-        \item Solved numerically via \texttt{scipy} RK45
-        \vspace{0.2cm}
         \item Tracks how separation shrinks with time
+        \vspace{0.2cm}
+        \item Solved numerically via \texttt{scipy} RK45
       \end{itemize}
     \end{column}
     \begin{column}{0.5\textwidth}
@@ -132,9 +170,9 @@
         f_\text{orb} = \frac{1}{2\pi}\sqrt{\frac{G(m_1+m_2)}{r^3}}
       \]
       \begin{itemize}
-        \item Derived from $F_g = F_\text{cen}$
+        \item Increases as separation decreases
         \vspace{0.2cm}
-        \item Increases as separation decreases (``chirp'')
+        \item Derived from $F_g = F_\text{cen}$
       \end{itemize}
     \end{column}
   \end{columns}
@@ -149,9 +187,8 @@
         h(t) = \frac{4(G\mathcal{M})^{5/3}\,\omega_r^{2/3}}{c^4\,d}
       \]
       \begin{itemize}
-        \item $\mathcal{M}$: chirp mass
-        \item $\omega_r = 2\pi f_\text{orb}$: orbital angular frequency
-        \item $d$: distance to observer
+        \item Amplitude of gravitational waves
+        \item orbital angular frequency: $\omega_r = 2\pi f_\text{orb}$
       \end{itemize}
     \end{column}
     \begin{column}{0.5\textwidth}
@@ -162,7 +199,7 @@
         \mathcal{M} = \frac{(m_1 m_2)^{3/5}}{(m_1+m_2)^{1/5}}
       \]
       \vspace{0.2cm}
-      Merger time:
+      Merger time (derived in the report):
       \[
         t_m = \frac{5}{256}\frac{c^5 r_0^4}{G^3 m_1 m_2(m_1+m_2)}
       \]
@@ -183,16 +220,16 @@
   \begin{columns}[t]
     \begin{column}{0.48\textwidth}
       \begin{itemize}
-        \item $h_\text{noisy}(t_1), \ldots, h_\text{noisy}(t_{17})$ \\ (noisy strain time-series)
+        \item noisy strain time-series: \\ $h_\text{noisy}(t_1), \ldots, h_\text{noisy}(t_{17})$ 
         \vspace{0.2cm}
-        \item $d$: observer distance
+        \item distance to observer: $d$
       \end{itemize}
     \end{column}
     \begin{column}{0.48\textwidth}
       \begin{itemize}
-        \item $r_0$: initial separation
+        \item initial separation: $r_0$
         \vspace{0.2cm}
-        \item $\mu = \frac{m_1 m_2}{m_1+m_2}$: reduced mass
+        \item reduced mass: $\mu = \frac{m_1 m_2}{m_1+m_2}$
       \end{itemize}
     \end{column}
   \end{columns}
@@ -204,12 +241,12 @@
       \begin{itemize}
         \item No missing values (synthetic data)
         \vspace{0.2cm}
-        \item \textbf{Log-transform} applied — large SI-unit magnitudes
+        \item \textbf{Log-transform} applied due to large SI-unit magnitudes
       \end{itemize}
     \end{column}
     \begin{column}{0.48\textwidth}
       \begin{itemize}
-        \item Values converted back to linear space for MAE
+        \item Values converted back to linear space for Mean Absolute Error
         \vspace{0.2cm}
         \item \textbf{75/25 train-test split} with fixed random seed
       \end{itemize}
@@ -370,10 +407,6 @@
     \item \textbf{Normalise strain by distance} to remove $d$ as an implicit shortcut
     \vspace{0.4em}
     \item Explore \textbf{other model architectures} that can extract waveform morphology
-    \vspace{0.4em}
-    \item Compare against LIGO's \textbf{matched filtering} pipeline as a baseline
-    \vspace{0.4em}
-    \item Use \textbf{Bayesian inference} frameworks (Bilby) to produce posterior distributions over parameters
   \end{itemize}
 \end{frame}
 
